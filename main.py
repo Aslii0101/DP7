@@ -8,6 +8,7 @@ MEDIUM = 32768
 FAST = 49152
 MAX_SPEED = 65535
 
+DREMPEL = 30000
 
 pwm_a = PWM(Pin(17), freq=1000)
 dir_a = Pin(13, Pin.OUT)
@@ -29,60 +30,79 @@ def stop_motors():
     pwm_b.duty_u16(0)
 
 
-def set_motor_a(speed, direction):
-    dir_a.value(direction)
+def forward(speed=MEDIUM):
+    dir_a.value(1)
+    dir_b.value(0)
     pwm_a.duty_u16(speed)
-
-
-def set_motor_b(speed, direction):
-    dir_b.value(direction)
     pwm_b.duty_u16(speed)
 
 
-def move_forward(speed):
-    set_motor_a(speed, 1)
-    set_motor_b(speed, 0)
+def backwards(speed=MEDIUM):
+    dir_a.value(0)
+    dir_b.value(1)
+    pwm_a.duty_u16(speed)
+    pwm_b.duty_u16(speed)
 
 
-def move_backwards(speed):
-    set_motor_a(speed, 0)
-    set_motor_b(speed, 1)
+def sharp_left():
+    dir_a.value(0)
+    dir_b.value(0)
+    pwm_a.duty_u16(SLOW)
+    pwm_b.duty_u16(FAST)
 
 
-def turn_left(speed):
-    set_motor_a(speed, 1)
-    set_motor_b(0, 0)
+def sharp_right():
+    dir_a.value(1)
+    dir_b.value(1)
+    pwm_a.duty_u16(FAST)
+    pwm_b.duty_u16(SLOW)
 
 
-def turn_right(speed):
-    set_motor_a(0, 1)
-    set_motor_b(speed, 0)
+def turn_left():
+    dir_a.value(1)
+    dir_b.value(0)
+    pwm_a.duty_u16(SLOW)
+    pwm_b.duty_u16(MEDIUM)
+
+
+def turn_right():
+    dir_a.value(1)
+    dir_b.value(0)
+    pwm_a.duty_u16(MEDIUM)
+    pwm_b.duty_u16(SLOW)
+
+
+def search_pattern():
+    print("Search")
+    sharp_left()
+    time.sleep(0.3)
+    stop_motors()
 
 
 def test_movement():
     print("Running movement tests")
     try:
         print("Forward")
-        move_forward(SLOW)
+        forward()
         time.sleep(0.5)
         stop_motors()
         time.sleep(0.2)
 
         print("Backwards")
-        move_backwards(SLOW)
+        backwards()
         time.sleep(0.5)
         stop_motors()
         time.sleep(0.2)
 
         print("Left")
-        turn_left(SLOW)
-        time.sleep(0.4)
+        turn_left()
+        time.sleep(0.5)
         stop_motors()
         time.sleep(0.2)
 
         print("Right")
-        turn_right(SLOW)
-        time.sleep(0.4)
+        turn_right()
+        time.sleep(0.5)
         stop_motors()
         time.sleep(0.2)
 
@@ -104,5 +124,5 @@ def test_sensors():
 
 
 while True:
-    test_sensors()
+    # test_sensors()
     test_movement()
