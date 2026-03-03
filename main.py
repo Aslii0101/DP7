@@ -1,60 +1,44 @@
 from machine import Pin, PWM, ADC
 import time
+import urandom
 
-# CONSTANTS
-STOP = 0
-SLOW = 16384
-MEDIUM = 32768
-FAST = 49152
-MAX_SPEED = 65535
-
-DREMPEL = 30000
-
-pwm_a = PWM(Pin(17), freq=1000)
-dir_a = Pin(13, Pin.OUT)
-pwm_b = PWM(Pin(11), freq=1000)
-dir_b = Pin(12, Pin.OUT)
-
-pwm_a.duty_u16(0)
-pwm_b.duty_u16(0)
-
-# ================= MOTORS =================
-motor1_pwm = PWM(Pin(17), freq=1000)   # fysiek gespiegeld
+# motors
+motor1_pwm = PWM(Pin(17), freq=1000)
 motor1_in1 = Pin(13, Pin.OUT)
 
 motor2_pwm = PWM(Pin(11), freq=1000)
 motor2_in1 = Pin(12, Pin.OUT)
 
-# ================= SENSORS =================
+# sensors
 pins = [1,7,6,5,4]
 sensors = [ADC(Pin(p), atten=ADC.ATTN_11DB) for p in pins]
 
 THRESHOLD = 30000
 
-BASE_SPEED = 0.40
-TURN_SPEED = 0.30
-SHARP_SPEED = 0.24
-SEARCH_SPEED = 0.28
+# speeds
+BASE_SPEED = 0.42
+TURN_SPEED = 0.32
+SHARP_SPEED = 0.26
+SEARCH_SPEED = 0.30
 
-# ================= MOTOR CONTROL =================
+# motor control
 def set_speed(left, right):
-    # ⭐ MOTORS WAREN OMGEKEERD
     motor1_pwm.duty_u16(int(65535 * right))
     motor2_pwm.duty_u16(int(65535 * left))
     motor1_in1.value(1)
     motor2_in1.value(0)
 
 def stop():
-    set_speed(0,0)
+    set_speed(0, 0)
 
 def forward():
     set_speed(BASE_SPEED, BASE_SPEED)
 
 def soft_left():
-    set_speed(TURN_SPEED*0.6, TURN_SPEED)
+    set_speed(TURN_SPEED * 0.6, TURN_SPEED)
 
 def soft_right():
-    set_speed(TURN_SPEED, TURN_SPEED*0.6)
+    set_speed(TURN_SPEED, TURN_SPEED * 0.6)
 
 def sharp_left():
     set_speed(0.05, SHARP_SPEED)
@@ -68,13 +52,16 @@ def spin_left():
 def spin_right():
     set_speed(SEARCH_SPEED, 0)
 
-# ================= STATUS =================
+# status
 last_direction = 1
 lost_counter = 0
+robot_state = "START"
 
-print("=== PERFECTE DP7 LINE FOLLOWER ===")
+# print timer (1x per seconde)
+last_print = time.ticks_ms()
 
-# ================= LOOP =================
+print("=== DP7 LINE FOLLOWER START ===")
+
 while True:
 
     vals = [s.read_u16() for s in sensors]
@@ -87,65 +74,71 @@ while True:
 
     line_seen = L1 or L2 or M or R2 or R1
 
-    print("Sensors:",L1,L2,M,R2,R1)
-
-    # ================= LINE FOLLOW =================
-    if line_seen:
-        lost_counter = 0
-
-        # scherpe bochten eerst
-        if L1:
-            print("SCHERP LINKS")
+    # T-kruispunt (alles zwart)
+    if L1 and L2 and M and R2 and R1:
+        robot_state = "T-KRUISPUNT"
+        if urandom.getrandbits(1):
             sharp_left()
             last_direction = -1
-
-        elif R1:
-            print("SCHERP RECHTS")
+            robot_state += " -> LINKS"
+        else:
             sharp_right()
             last_direction = 1
+            robot_state += " -> RECHTS"
+        time.sleep(0.25)
 
-        # lichte bochten
+    # normaal kruispunt
+    elif L2 and M and R2:
+        forward()
+        robot_state = "KRUISPUNT RECHTDOOR"
+
+    # lijn volgen
+    elif line_seen:
+        lost_counter = 0
+
+        if L1:
+            sharp_left()
+            last_direction = -1
+            robot_state = "SCHERP LINKS"
+
+        elif R1:
+            sharp_right()
+            last_direction = 1
+            robot_state = "SCHERP RECHTS"
+
         elif L2:
-            print("LICHT LINKS")
             soft_left()
             last_direction = -1
+            robot_state = "LICHT LINKS"
 
         elif R2:
-            print("LICHT RECHTS")
             soft_right()
             last_direction = 1
+            robot_state = "LICHT RECHTS"
 
-        # recht maar corrigeren
         elif M:
-            print("RECHT + CORRECTIE")
             forward()
+            robot_state = "RECHT"
 
-    # ================= SEARCH MODE =================
+    # zoeken
     else:
         lost_counter += 1
-        print("LIJN KWIJT:", lost_counter)
 
-        # ⭐ eerst stoppen
-        if lost_counter == 1:
-            stop()
-            time.sleep(0.15)
-
-        # scan laatste richting
-        elif lost_counter < 40:
+        if lost_counter < 60:
             if last_direction == 1:
                 spin_right()
+                robot_state = "ZOEKEN RECHTS"
             else:
                 spin_left()
-
-        # volledige draai
-        elif lost_counter < 100:
-            print("180° ZOEK")
-            spin_right()
-
-        # reset poging
+                robot_state = "ZOEKEN LINKS"
         else:
-            stop()
-            time.sleep(0.2)
-            lost_counter = 0
+            spin_right()
+            robot_state = "180° ZOEKEN"
+
+    # serial output
+    now = time.ticks_ms()
+    if time.ticks_diff(now, last_print) > 1000:
+        print(robot_state)
+        last_print = now
 
     time.sleep(0.02)
