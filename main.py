@@ -1,6 +1,23 @@
 from machine import Pin, PWM, ADC
 import time
 
+# CONSTANTS
+STOP = 0
+SLOW = 16384
+MEDIUM = 32768
+FAST = 49152
+MAX_SPEED = 65535
+
+DREMPEL = 30000
+
+pwm_a = PWM(Pin(17), freq=1000)
+dir_a = Pin(13, Pin.OUT)
+pwm_b = PWM(Pin(11), freq=1000)
+dir_b = Pin(12, Pin.OUT)
+
+pwm_a.duty_u16(0)
+pwm_b.duty_u16(0)
+
 # ================= MOTORS =================
 motor1_pwm = PWM(Pin(17), freq=1000)   # fysiek gespiegeld
 motor1_in1 = Pin(13, Pin.OUT)
