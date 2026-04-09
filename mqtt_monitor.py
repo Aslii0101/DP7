@@ -5,12 +5,24 @@ import string
 from datetime import datetime
 
 import paho.mqtt.client as mqtt
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QSpinBox, QDoubleSpinBox, QSlider, QTextEdit,
-    QGroupBox, QGridLayout, QComboBox, QLineEdit
+from PyQt6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QLabel,
+    QSpinBox,
+    QDoubleSpinBox,
+    QSlider,
+    QTextEdit,
+    QGroupBox,
+    QGridLayout,
+    QComboBox,
+    QLineEdit,
 )
-from PyQt5.QtCore import QTimer, Qt
+from PyQt6.QtCore import QTimer, Qt
 
 # ------------------------------------------------------------
 # Configuration
@@ -21,24 +33,28 @@ BASE_TOPIC = "student/AD25VBa4"
 CLIENT_ID = "dashboard_" + "".join(random.sample(string.ascii_letters, 8))
 
 # All topics
-TOPIC_CMD         = f"{BASE_TOPIC}/cmd"
-TOPIC_STATUS      = f"{BASE_TOPIC}/robot_status"
-TOPIC_PID_KP      = f"{BASE_TOPIC}/pid/kp"
-TOPIC_PID_KI      = f"{BASE_TOPIC}/pid/ki"
-TOPIC_PID_KD      = f"{BASE_TOPIC}/pid/kd"
-TOPIC_SPEED       = f"{BASE_TOPIC}/speed"
-TOPIC_PID_STATUS  = f"{BASE_TOPIC}/pid_status"
-TOPIC_SPEED_STATUS= f"{BASE_TOPIC}/speed_status"
-TOPIC_ROUTE       = f"{BASE_TOPIC}/route"
-TOPIC_COMMAND     = f"{BASE_TOPIC}/command"
-TOPIC_NODE        = f"{BASE_TOPIC}/node"
-TOPIC_DEBUG       = f"{BASE_TOPIC}/debug"
+TOPIC_CMD = f"{BASE_TOPIC}/cmd"
+TOPIC_STATUS = f"{BASE_TOPIC}/robot_status"
+TOPIC_PID_KP = f"{BASE_TOPIC}/pid/kp"
+TOPIC_PID_KI = f"{BASE_TOPIC}/pid/ki"
+TOPIC_PID_KD = f"{BASE_TOPIC}/pid/kd"
+TOPIC_SPEED = f"{BASE_TOPIC}/speed"
+TOPIC_PID_STATUS = f"{BASE_TOPIC}/pid_status"
+TOPIC_SPEED_STATUS = f"{BASE_TOPIC}/speed_status"
+TOPIC_ROUTE = f"{BASE_TOPIC}/route"
+TOPIC_COMMAND = f"{BASE_TOPIC}/command"
+TOPIC_NODE = f"{BASE_TOPIC}/node"
+TOPIC_DEBUG = f"{BASE_TOPIC}/debug"
 
 # All topics we subscribe to (incoming)
 SUBSCRIBE_TOPICS = [
-    TOPIC_STATUS, TOPIC_PID_STATUS, TOPIC_SPEED_STATUS,
-    TOPIC_NODE, TOPIC_DEBUG
+    TOPIC_STATUS,
+    TOPIC_PID_STATUS,
+    TOPIC_SPEED_STATUS,
+    TOPIC_NODE,
+    TOPIC_DEBUG,
 ]
+
 
 # ------------------------------------------------------------
 # PyQt5 Dashboard
@@ -123,7 +139,7 @@ class RobotDashboard(QMainWindow):
         # Group: Base speed
         speed_group = QGroupBox("Base Speed")
         speed_layout = QVBoxLayout()
-        self.speed_slider = QSlider(Qt.Horizontal)
+        self.speed_slider = QSlider(Qt.Orientation.Horizontal)
         self.speed_slider.setRange(0, 100)
         self.speed_slider.setValue(12)  # 0.12 -> 12%
         self.speed_slider.valueChanged.connect(self.send_speed)
@@ -175,6 +191,7 @@ class RobotDashboard(QMainWindow):
         self.send_raw_btn = QPushButton("Send Raw")
         self.send_raw_btn.clicked.connect(self.send_raw_actions)
         route_layout.addWidget(self.send_raw_btn)
+        route_group.setLayout(route_layout)
 
         main_layout.addWidget(route_group)
 
@@ -298,6 +315,7 @@ class RobotDashboard(QMainWindow):
         self.mqtt_client.disconnect()
         event.accept()
 
+
 # ------------------------------------------------------------
 # Main
 # ------------------------------------------------------------
@@ -305,4 +323,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     dashboard = RobotDashboard()
     dashboard.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
