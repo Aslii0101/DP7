@@ -59,53 +59,117 @@ T_DEBUG       = b"student/AD25VBa4/debug"
 STOPS = {0, 1, 2, 3, 4, 5}
 
 GRAPH = {
-    0:  [6],
-    1:  [13],
-    2:  [8],
-    3:  [9],
-    4:  [12],
-    5:  [11],
-    6:  [0, 7, 9],
-    7:  [6, 8, 13],
-    8:  [7, 9, 2],
-    9:  [6, 8, 3, 10],
-    10: [9, 11],
-    11: [10, 12, 5],
-    12: [11, 13, 4],
-    13: [12, 7, 1],
+     0: [6],                 # Depot
+     1: [17],                # Wildwaterbaan
+     2: [20],                # Arcadehal
+     3: [8],                 # Reuzenrad
+     4: [14],                # VrijeValToren
+     5: [11],                # Achtbaan
+     6: [0, 7, 21],          # orig Node 7
+     7: [6, 8, 9],           # orig Node 8
+     8: [3, 7, 9],           # orig Node 10
+     9: [7, 8, 10],          # orig Node 11
+    10: [9, 11, 12],         # orig Node 12 (U-curve start)
+    11: [5, 10, 12],         # orig Node 13 (inner curve end)
+    12: [10, 11, 13],        # orig Node 14 (outer curve end)
+    13: [12, 14, 15],        # orig Node 15
+    14: [4, 13, 15],         # orig Node 17
+    15: [13, 14, 16],        # orig Node 18
+    16: [15, 17, 18],        # orig Node 19
+    17: [1, 16, 18],         # orig Node 21
+    18: [16, 17, 19],        # orig Node 22
+    19: [18, 20, 21],        # orig Node 24
+    20: [2, 19, 21],         # orig Node 26
+    21: [6, 19, 20],         # orig Node 27
 }
 
 STOP_NAMES = {
-    0: "Depot", 1: "Wildewaterbaan", 2: "Arcadehal",
+    0: "Depot", 1: "Wildwaterbaan", 2: "Arcadehal",
     3: "Reuzenrad", 4: "VrijeValToren", 5: "Achtbaan",
 }
 
 # ROUTING[current_node][came_from][next_node] → physical action
 ROUTING = {
-    6:  {0: {7: "LEFT", 9: "RIGHT"},
-         7: {0: "RIGHT", 9: "STRAIGHT"},
-         9: {0: "LEFT", 7: "STRAIGHT"}},
-    7:  {6:  {8: "STRAIGHT", 13: "LEFT"},
-         8:  {6: "STRAIGHT", 13: "RIGHT"},
-         13: {6: "RIGHT", 8: "LEFT"}},
-    8:  {7: {9: "STRAIGHT", 2: "RIGHT"},
-         9: {7: "STRAIGHT", 2: "LEFT"},
-         2: {7: "LEFT", 9: "RIGHT"}},
-    9:  {6:  {8: "LEFT", 3: "STRAIGHT", 10: "RIGHT"},
-         8:  {6: "RIGHT", 3: "STRAIGHT", 10: "LEFT"},
-         3:  {6: "LEFT", 8: "RIGHT", 10: "STRAIGHT"},
-         10: {6: "STRAIGHT", 8: "RIGHT", 3: "LEFT"}},
-    10: {9:  {11: "STRAIGHT"},
-         11: {9: "STRAIGHT"}},
-    11: {10: {12: "STRAIGHT", 5: "RIGHT"},
-         12: {10: "STRAIGHT", 5: "LEFT"},
-         5:  {10: "LEFT", 12: "RIGHT"}},
-    12: {11: {13: "STRAIGHT", 4: "LEFT"},
-         13: {11: "STRAIGHT", 4: "RIGHT"},
-         4:  {11: "RIGHT", 13: "LEFT"}},
-    13: {12: {7: "STRAIGHT", 1: "RIGHT"},
-         7:  {12: "STRAIGHT", 1: "LEFT"},
-         1:  {12: "LEFT", 7: "RIGHT"}},
+    6: {
+        0: {7: "STRAIGHT", 21: "RIGHT"},
+        7: {0: "STRAIGHT", 21: "LEFT"},
+        21: {0: "LEFT", 7: "RIGHT"},
+    },
+    7: {
+        6: {9: "STRAIGHT", 8: "LEFT"},
+        8: {6: "RIGHT", 9: "LEFT"},
+        9: {6: "STRAIGHT", 8: "RIGHT"},
+    },
+    8: {
+        3: {9: "STRAIGHT", 7: "RIGHT"},
+        7: {3: "LEFT", 9: "RIGHT"},
+        9: {3: "STRAIGHT", 7: "LEFT"},
+    },
+    9: {
+        7: {10: "STRAIGHT", 8: "LEFT"},
+        8: {10: "LEFT", 7: "RIGHT"},
+        10: {7: "STRAIGHT", 8: "RIGHT"},
+    },
+    10: {
+        9: {12: "STRAIGHT", 11: "LEFT"},
+        11: {12: "LEFT", 9: "RIGHT"},
+        12: {9: "STRAIGHT", 11: "RIGHT"},
+    },
+    11: {
+        5: {12: "STRAIGHT", 10: "RIGHT"},
+        10: {5: "LEFT", 12: "RIGHT"},
+        12: {5: "STRAIGHT", 10: "LEFT"},
+    },
+    12: {
+        10: {13: "STRAIGHT", 11: "LEFT"},
+        11: {13: "LEFT", 10: "RIGHT"},
+        13: {10: "STRAIGHT", 11: "RIGHT"},
+    },
+    13: {
+        12: {15: "STRAIGHT", 14: "RIGHT"},
+        14: {12: "LEFT", 15: "RIGHT"},
+        15: {12: "STRAIGHT", 14: "LEFT"},
+    },
+    14: {
+        4: {15: "STRAIGHT", 13: "LEFT"},
+        13: {15: "LEFT", 4: "RIGHT"},
+        15: {4: "STRAIGHT", 13: "RIGHT"},
+    },
+    15: {
+        13: {16: "STRAIGHT", 14: "RIGHT"},
+        14: {13: "LEFT", 16: "RIGHT"},
+        16: {13: "STRAIGHT", 14: "LEFT"},
+    },
+    16: {
+        15: {18: "STRAIGHT", 17: "RIGHT"},
+        17: {15: "LEFT", 18: "RIGHT"},
+        18: {15: "STRAIGHT", 17: "LEFT"},
+    },
+    17: {
+        1: {18: "STRAIGHT", 16: "LEFT"},
+        16: {18: "LEFT", 1: "RIGHT"},
+        18: {1: "STRAIGHT", 16: "RIGHT"},
+    },
+    18: {
+        16: {19: "STRAIGHT", 17: "RIGHT"},
+        17: {16: "LEFT", 19: "RIGHT"},
+        19: {16: "STRAIGHT", 17: "LEFT"},
+    },
+    19: {
+        18: {21: "STRAIGHT", 20: "RIGHT"},
+        20: {18: "LEFT", 21: "RIGHT"},
+        21: {18: "STRAIGHT", 20: "LEFT"},
+    },
+    20: {
+        2: {21: "STRAIGHT", 19: "LEFT"},
+        19: {21: "LEFT", 2: "RIGHT"},
+        21: {2: "STRAIGHT", 19: "RIGHT"},
+    },
+    21: {
+        6: {19: "STRAIGHT", 20: "LEFT"},
+        19: {6: "STRAIGHT", 20: "RIGHT"},
+        20: {19: "LEFT", 6: "RIGHT"},
+    },
 }
 
 # ============================================================
@@ -198,7 +262,7 @@ MIN_OUTPUT = -1.0
 last_time = time.ticks_ms()
 
 # speeds
-BASE_SPEED   = 0.12
+BASE_SPEED   = 0.14
 SHARP_SPEED  = 0.08
 SEARCH_SPEED = 0.12
 DEADBAND     = 0.04
